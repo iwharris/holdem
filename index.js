@@ -17,6 +17,13 @@ class CardSet extends Set {
 class Card {
 
 	constructor(face, suit) {
+    if (!['D', 'H', 'C', 'S'].includes(suit)) {
+      throw new Error(`'${suit}' is not a valid suit`);
+    }
+
+    if (!['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'].includes(face)) {
+      throw new Error(`'${face} is not a valid face'`);
+    }
 		this.face = face;
 		this.suit = suit;
 	}
@@ -74,8 +81,13 @@ class Hand {
 	}
 
 	static fromString(handString) {
-		const [name, ...cardStrings] = handString.split(' ');
-		const cards = cardStrings.map(Card.fromString);
+    const [name, ...cardStrings] = handString.split(' ')
+      .map(str => str.trim()) // Strip whitespace from strings
+      .filter(Boolean); // Omit falsy values
+    const cards = cardStrings.map(Card.fromString);
+    if (cards.length !== 2) {
+      throw new Error(`Player '${name}' must have two cards!`);
+    }
 		return new Hand(name, cards);
 	}
 
@@ -91,13 +103,21 @@ class Hand {
 const lines = data.split('\n') 	// Split data on newlines
 	.map(str => str.trim()) 	// Trim whitespace
 	.filter(Boolean); 			// Omit empty (falsy) lines
+if (lines.length < 2) { // A minimum of 1 line of community cards and 1 hand are required
+  throw new Error('At least 2 lines of input are required.');
+}
 
 // Print raw input
 // lines.forEach(line => console.log(line))
 
 const [communityCardsString, ...handStrings] = lines;
 
-const communityCards = communityCardsString.split(' ').map(Card.fromString);
+const communityCards = new CardSet(communityCardsString.split(' ').map(Card.fromString));
+
+if (communityCards.size !== 5) {
+  throw new Error('5 community cards are required.');
+}
+
 const hands = handStrings.map(Hand.fromString);
 
 console.log('Community cards:', communityCards.map(c => c.toString()).join(', '));
