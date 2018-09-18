@@ -2,6 +2,13 @@
 
 const fs = require('fs');
 
+const {
+	FACE_VALUES,
+	FACE_VALUE_NAMES,
+	SUITS,
+	SUIT_NAMES,
+} = require('./constants');
+
 
 class CardSet extends Set {
 	/**
@@ -16,8 +23,6 @@ class CardSet extends Set {
     // Returns cards in ascending order
     return Array.from(this).sort((cardA, cardB) => cardA.getNumericFaceValue() - cardB.getNumericFaceValue());
   }
-
-
 }
 
 function findHighCard(cardSet) {
@@ -29,13 +34,12 @@ function findHighCard(cardSet) {
 }
 
 class Card {
-
 	constructor(face, suit) {
-    if (!['D', 'H', 'C', 'S'].includes(suit)) {
+    if (!SUITS.includes(suit)) {
       throw new Error(`'${suit}' is not a valid suit`);
     }
 
-    if (!['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'].includes(face)) {
+    if (!FACE_VALUES.includes(face)) {
       throw new Error(`'${face} is not a valid face'`);
     }
 		this.face = face;
@@ -43,34 +47,15 @@ class Card {
 	}
 
 	getNumericFaceValue() {
-		switch(this.face) {
-			case 'T': return 10;
-			case 'J': return 11;
-			case 'Q': return 12;
-			case 'K': return 13;
-			case 'A': return 14; // Exception: ace can be low in a straight, high otherwise
-			default: return parseInt(this.face);
-		}
+		return FACE_VALUES.findIndex(v => v === this.face) + 2;
 	}
 
-	getFace() {
-		switch(this.face) {
-			case 'A': return 'Ace';
-			case 'T': return 'Ten';
-			case 'J': return 'Jack';
-			case 'Q': return 'Queen';
-			case 'K': return 'King';
-			default: return this.face;
-		};
+	getFaceName() {
+		return FACE_VALUE_NAMES[this.face] || this.face;
 	}
 
 	getSuit() {
-		switch(this.suit) {
-			case 'D': return 'Diamonds';
-			case 'H': return 'Hearts';
-			case 'S': return 'Spades';
-			case 'C': return 'Clubs';
-		};
+		return SUIT_NAMES[this.suit];
 	}
 
 	static fromString(cardString) {
@@ -79,7 +64,7 @@ class Card {
 	}
 
 	toString() {
-		return `${this.getFace()} of ${this.getSuit()} (${this.getNumericFaceValue()})`;
+		return `${this.getFaceName()} of ${this.getSuit()} (${this.getNumericFaceValue()})`;
 	}
 }
 
@@ -87,11 +72,6 @@ class Hand {
 	constructor(name, cards=[]) {
 		this.name = name;
 		this.cards = new CardSet(cards);
-	}
-
-	getValue() {
-		// TODO compute value of hand
-		return 0;
 	}
 
 	static fromString(handString) {
@@ -111,10 +91,9 @@ class Hand {
 
 	computeHandValue(communityCards) {
     const combinedCards = new CardSet(Array.from(this.cards).concat(Array.from(communityCards)));
-    console.log('full hand', combinedCards);
 
     const highCard = findHighCard(combinedCards);
-    console.log('High Card', highCard);
+
     // TODO Compute the best hand you can make with these cards
     return false;
 	}
