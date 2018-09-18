@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 
-const data = fs.readFileSync(0, 'utf8'); // Read data from stdin
 
 class CardSet extends Set {
 	/**
@@ -100,9 +99,13 @@ class Hand {
 	}
 }
 
-const lines = data.split('\n') 	// Split data on newlines
+function main() {
+  const data = fs.readFileSync(0, 'utf8'); // Read data from stdin
+
+  const lines = data.split('\n') 	// Split data on newlines
 	.map(str => str.trim()) 	// Trim whitespace
-	.filter(Boolean); 			// Omit empty (falsy) lines
+  .filter(Boolean); 			// Omit empty (falsy) lines
+
 if (lines.length < 2) { // A minimum of 1 line of community cards and 1 hand are required
   throw new Error('At least 2 lines of input are required.');
 }
@@ -123,3 +126,11 @@ const hands = handStrings.map(Hand.fromString);
 console.log('Community cards:', communityCards.map(c => c.toString()).join(', '));
 hands.forEach(hand => console.log(hand.toString()));
 
+try {
+  main();
+  process.exit(0);
+} catch (err) {
+  console.log(`Error: ${err.message}`);
+  // console.error(err);
+  process.exit(1);
+}

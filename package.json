@@ -1,7 +1,7 @@
 {
   "name": "holdem",
   "version": "0.0.0",
-  "description": "A Node utility to parse the state of a game of Texas Hold'em, classify and rank hands, and output the results",
+  "description": "A Node utility to parse the state of a game of Texas Hold'em, classify each player's hand, rank the hands, and output the results",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
