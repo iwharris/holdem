@@ -10,7 +10,22 @@ class CardSet extends Set {
 	 */
 	map(func) {
 		return Array.from(this).map(func);
-	}
+  }
+
+  getSortedArrayByValue() {
+    // Returns cards in ascending order
+    return Array.from(this).sort((cardA, cardB) => cardA.getNumericFaceValue() - cardB.getNumericFaceValue());
+  }
+
+
+}
+
+function findHighCard(cardSet) {
+  const sortedCards = cardSet.getSortedArrayByValue();
+
+  // console.log('sorted array', sortedCards);
+  return sortedCards[sortedCards.length-1];
+
 }
 
 class Card {
@@ -95,7 +110,13 @@ class Hand {
 	}
 
 	computeHandValue(communityCards) {
-		const fullHand = this.cards
+    const combinedCards = new CardSet(Array.from(this.cards).concat(Array.from(communityCards)));
+    console.log('full hand', combinedCards);
+
+    const highCard = findHighCard(combinedCards);
+    console.log('High Card', highCard);
+    // TODO Compute the best hand you can make with these cards
+    return false;
 	}
 }
 
@@ -124,7 +145,8 @@ if (communityCards.size !== 5) {
 const hands = handStrings.map(Hand.fromString);
 
 console.log('Community cards:', communityCards.map(c => c.toString()).join(', '));
-hands.forEach(hand => console.log(hand.toString()));
+hands.forEach(hand => console.log(hand.toString(), hand.computeHandValue(communityCards)));
+}
 
 try {
   main();

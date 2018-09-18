@@ -12,6 +12,6 @@
   "author": "Ian Harris",
   "license": "Unlicense",
   "bin": {
-    "holdem": "./index.js"
+    "holdem": "./src/index.js"
   }
 }
