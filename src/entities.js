@@ -113,6 +113,14 @@ class HandResult {
 
   }
 
+  static buildFourOfAKind(quadSet, possibleKickers) {
+    return new HandResult({
+      name: 'Four of a Kind',
+      cards,
+      comparator: () => 0,
+    })
+  }
+
   static buildFlush(cards) {
     return new HandResult({
       name: 'Flush',

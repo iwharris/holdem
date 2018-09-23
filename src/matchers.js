@@ -14,11 +14,11 @@ function findStraightFlush(cardSet) {
 }
 
 function findFourOfAKind(cardSet) {
-  const suitGroups = cardSet.getGroupsBySuit();
+  const faceGroups = cardSet.getGroupsByFaceValue();
 
-  const matchingKey = Object.keys(suitGroups).find(key => suitGroups[key].length === 4);
+  const face = Object.keys(suitGroups).find(key => faceGroups[key].length === 4);
 
-  return false;
+  return !suit ? false : Handresult.buildFourOfAKind();
 }
 
 function findFullHouse(cardSet) {
