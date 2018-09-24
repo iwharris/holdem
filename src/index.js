@@ -22,19 +22,25 @@ function main() {
 
 	const [communityCardsString, ...handStrings] = lines;
 
-	const communityCards = CardSet.from((communityCardsString.split(' ').map(Card.fromString)));
+	const communityCards = new CardSet((communityCardsString.split(' ').map(Card.fromString)));
 
-	if (communityCards.length !== 5) {
+	if (communityCards.size !== 5) {
 		throw new Error('5 community cards are required.');
 	}
 
 	const hands = handStrings.map(Hand.fromString);
 
 	console.log('Community cards:', communityCards.map(c => c.toString()).join(', '));
-	hands.forEach((hand) => {
-		// console.log(hand.toString());
-		const combinedCards = hand.cards.concat(communityCards).sortByFaceValueDescending();
-		console.log(`${hand.name} ${findHandResult(combinedCards).toString()}`);
+
+	// Calculate the HandResult for each Hand
+	hands.forEach(hand => hand.result = findHandResult(hand.cards.union(communityCards)));
+
+	// Sort hands by rank, breaking ties where possible
+	const ranking = hands.sort((handA, handB) => handA.result.handRank - handB.result.handRank);
+
+	// Print each ranking, player name, and hand
+	ranking.forEach((hand) => {
+		console.log(`${hand.result.handRank} ${hand.name} ${hand.result.toString()} [${hand.cards.union(communityCards).toString()}]`);
 	});
 }
 

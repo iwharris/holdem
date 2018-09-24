@@ -5,13 +5,39 @@ const {
 	SUIT_NAMES,
 } = require('./constants');
 
-class CardSet extends Array {
+class CardSet extends Set {
+  map(mapFunc) {
+    return this.toSortedArray().map(mapFunc);
+  }
+
+  filter() {
+
+  }
+
+  /* Set operations */
+
   /**
-   * Generic groupBy function. Groups
-   * @param {*} groupProperty
+   * Given another Cardset, returns a new CardSet that represents the union of this CardSet
+   * and the other CardSet (ie. all elements of both CardSets without duplicates).
+   *
+   * @param {*} otherSet A new Cardset
    */
+  union(otherSet) {
+    return new CardSet([...this, ...otherSet]);
+  }
+
+  intersection(otherSet) {
+    return new CardSet([...this].filter(card => otherSet.has(card)));
+  }
+
+  difference(otherSet) {
+    return new CardSet([...this].filter(card => !otherSet.has(card)));
+  }
+
+  /* Conversions */
+
   getGroupsBy(groupProperty) {
-		return this.reduce((groups, card) => {
+		return this.toSortedArray().reduce((groups, card) => {
 			if (!groups[card[groupProperty]]) {
 				groups[card[groupProperty]] = [card];
 			} else {
@@ -22,16 +48,44 @@ class CardSet extends Array {
 		}, {});
   }
 
+  /**
+   * Returns a new Object with suit IDs as keys, each mapping to an array of Cards as values.
+   * The Card arrays are sorted in descending order of face value.
+   * Suits with no cards will not be represented in the object.
+   */
   getGroupsBySuit() {
     return this.getGroupsBy('suit');
 	}
 
+  /**
+   * Returns a new Object with face IDs as keys, each mapping to an array of Cards as values.
+   * The Card arrays are sorted in descending order of face value.
+   * Suits with no cards will not be represented in the object.
+   */
 	getGroupsByFaceValue() {
     return this.getGroupsBy('face');
   }
 
-  sortByFaceValueDescending() {
-    return this.sort((cardA, cardB) => cardB.getNumericFaceValue() - cardA.getNumericFaceValue());
+  getFaceGroupsOfSize(size) {
+    const faceGroups = this.getGroupsByFaceValue();
+    const faces = Object.keys(faceGroups).filter(key => faceGroups[key].length >= size);
+
+    return faces.reduce((acc, currentFace) => {
+      acc[currentFace] = Array.from(faceGroups[currentFace]);
+      return acc;
+    }, {});
+  }
+
+  /**
+   * Returns a new Array of cards sorted in descending order of face value
+   * (ie. highest face cards first).
+   */
+  toSortedArray() {
+    return Array.from(this).sort(Card.faceValueComparator);
+  }
+
+  toString() {
+    return this.map(card => `${card.face}${card.suit}`).join(', ');
   }
 }
 
@@ -46,7 +100,7 @@ class Card {
     }
 		this.face = face;
 		this.suit = suit;
-	}
+  }
 
 	getNumericFaceValue() {
 		return FACE_VALUES.findIndex(v => v === this.face) + 2;
@@ -64,6 +118,20 @@ class Card {
     return `${this.getFaceName()} of ${this.getSuit()} (${this.getNumericFaceValue()})`;
   }
 
+  /**
+   * Comparator function which compares the face value of two Cards, giving precedence
+   * to the card with a higher face value.
+   */
+  static faceValueComparator(cardA, cardB) {
+    return cardB.getNumericFaceValue() - cardA.getNumericFaceValue();
+  }
+
+  /**
+   * Factory function. Returns a new Card instance based on an encoded string of the form
+   * <FACE_VALUE><SUIT>. For example, King of Diamonds would be "KD".
+   *
+   * @param {string} cardString
+   */
 	static fromString(cardString) {
 		const [value, suit] = cardString;
 		return new Card(value, suit);
@@ -73,7 +141,7 @@ class Card {
 class Hand {
 	constructor(name, cards=[]) {
 		this.name = name;
-    this.cards = CardSet.from(cards);
+    this.cards = new CardSet(cards);
 	}
 
 	static fromString(handString) {
@@ -97,49 +165,91 @@ class HandResult {
     Object.assign(this, options);
   }
 
+  getHandResultString() {
+    return 'NOT IMPLEMENTED';
+  }
+
   toString() {
-    return `${this.name} ${this.cards[0].getFaceName()}`;
+    return `${this.name} ${this.getHandResultString()}`;
   }
 
-  compareHands(handA, handB) {
-    if (handA.handRank != handB.handRank) {
-      return handB.handRank - handA.handRank; // Lower handRank should come first
-    } else {
-      return this.comparator(handA, handB);
-    }
-  }
+  // compareHands(handA, handB) {
+  //   if (handA.handRank != handB.handRank) {
+  //     return handB.handRank - handA.handRank; // Lower handRank should come first
+  //   } else {
+  //     return this.comparator(handA, handB);
+  //   }
+  // }
 
-  static buildRoyalFlush() {
-
-  }
-
-  static buildFourOfAKind(quadSet, possibleKickers) {
+  static buildRoyalFlush(cards) {
     return new HandResult({
-      name: 'Four of a Kind',
+      name: 'Royal Flush',
+      handRank: 0,
       cards,
-      comparator: () => 0,
-    })
-  }
-
-  static buildFlush(cards) {
-    return new HandResult({
-      name: 'Flush',
-      cards,
-      comparator: (handA, handB) => {
-        return 0;
-      },
     });
   }
 
-  static buildHighCard(cards) {
-    console.log(cards);
+  static buildFourOfAKind(cards, quad) {
+    return new HandResult({
+      name: 'Four of a Kind',
+      handRank: 2,
+      cards,
+      getHandResultString: () => `${quad[0].getFaceName()}`,
+    });
+  }
+
+  static buildFullHouse(cards, triple, pair) {
+    return new HandResult({
+      name: 'Full House',
+      handRank: 3,
+      cards,
+      getHandResultString: () => [triple, pair].map(group => group[0].getFaceName()).join(' '),
+    });
+  }
+
+  static buildFlush(cards, flush) {
+    return new HandResult({
+      name: 'Flush',
+      handRank: 4,
+      cards,
+      getHandResultString: () => `${flush[0].getFaceName()}`
+    });
+  }
+
+  static buildThreeOfAKind(cards, triple) {
+    return new HandResult({
+      name: 'Three of a Kind',
+      handRank: 6,
+      cards,
+      getHandResultString: () => `${triple[0].getFaceName()}`,
+    });
+  }
+
+  static buildTwoPair(cards, pairs) {
+    return new HandResult({
+      name: 'Two Pair',
+      handRank: 7,
+      cards,
+      getHandResultString: () => pairs.map(pair => pair[0].getFaceName()).join(' '),
+    });
+  }
+
+  static buildOnePair(cards, pair) {
+    return new HandResult({
+      name: 'Pair',
+      handRank: 8,
+      cards,
+      getHandResultString: () => `${pair[0].getFaceName()}`,
+    });
+  }
+
+  static buildHighCard(cards, highCard) {
     return new HandResult({
       name: 'High',
+      handRank: 9,
       cards,
-      comparator: (handA, handB) => {
-        return 0;
-      },
-    })
+      getHandResultString: () => `${highCard.getFaceName()}`,
+    });
   }
 }
 
