@@ -5,5 +5,8 @@
     },
     "plugins": [
         "jest"
-    ]
+    ],
+    "rules": {
+      "no-console": 0
+    }
 }
