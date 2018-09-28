@@ -209,10 +209,6 @@ class HandResult {
     Object.assign(this, options);
   }
 
-  // getHandResultString() {
-  //   return 'NOT IMPLEMENTED';
-  // }
-
   toString() {
     return `${this.name} ${this.getHandResultString()}`;
   }
@@ -224,6 +220,12 @@ class HandResult {
   //     return this.comparator(handA, handB);
   //   }
   // }
+
+  /**
+   * Static builders
+   *
+   * The following static functions take explicit inputs and map them to a HandResult object.
+   */
 
   static buildRoyalFlush(cards, flush) {
     return new HandResult({
