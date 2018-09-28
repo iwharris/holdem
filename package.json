@@ -4,7 +4,7 @@
   "description": "A Node utility to parse the state of a game of Texas Hold'em, classify each player's hand, rank the hands, and output the results",
   "scripts": {
     "lint": "eslint src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
     "holdem": "./index.js"
   },
   "devDependencies": {
-    "eslint": "^5.6.0"
+    "eslint": "^5.6.0",
+    "jest": "^23.6.0"
   }
 }

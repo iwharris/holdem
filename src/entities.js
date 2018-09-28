@@ -159,7 +159,7 @@ class Card {
   }
 
   isImmediatelyAfter(previousCard) {
-    return (previousCard.getNumericFaceValue() - this.getNumericFaceValue() === 1) || (previousCard.face === '2' && this.face === 'A')
+    return (previousCard.getNumericFaceValue() - this.getNumericFaceValue() === 1) || (previousCard.face === '2' && this.face === 'A');
   }
 
   /**

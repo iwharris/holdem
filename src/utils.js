@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-function readArgs(argv) {
+function readArgs(argv = []) {
 	return {
 		isVerbose: ['--verbose', '-v'].map(f => argv.includes(f)).some(Boolean),
 	};
