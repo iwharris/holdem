@@ -1,5 +1,9 @@
 const { HandResult, Card, CardSet } = require('./entities');
 
+/**
+ * Helpers
+ */
+
 function sortGroupsByFaceValue(faceGroups) {
   return Object.values(faceGroups)
     .sort((pairA, pairB) => Card.faceValueComparator(pairA[0], pairB[0])); // Sort in descending face value
@@ -58,6 +62,8 @@ function matchFlush(cards) {
 }
 
 function matchStraight(cards) {
+  const straight = cards.getStraight();
+
   return false;
 }
 

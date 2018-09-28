@@ -10,8 +10,8 @@ class CardSet extends Set {
     return this.toSortedArray().map(mapFunc);
   }
 
-  filter() {
-
+  filter(filterFunc) {
+    return this.toSortedArray().filter(filterFunc);
   }
 
   /* Set operations */
@@ -74,6 +74,32 @@ class CardSet extends Set {
       acc[currentFace] = Array.from(faceGroups[currentFace]);
       return acc;
     }, {});
+  }
+
+  /**
+   * Finds a straight inside this CardSet if one exists.
+   * @param {Boolean} options.royalFlush finds Royal Flush
+   * @param {Boolean} options.straightFlush finds Straight Flush
+   *
+   * @return Array containing 5 cards in descending order if a straight is found; undefined otherwise
+   */
+  getStraight(options = {}) {
+    const straight = this.toSortedArray().reduce((acc, current) => {
+      if (acc.length === 5) { // Short circuit if we found our straight
+        return acc;
+      }
+
+      const [last] = acc.slice(-1);
+
+      // Compare last with current
+
+      console.log('last', last);
+      console.log('acc', acc);
+      console.log('current', current)
+      acc.push(current);
+      return acc;
+    }, []);
+    return straight.length != 5 ? false : straight;
   }
 
   /**
@@ -165,9 +191,9 @@ class HandResult {
     Object.assign(this, options);
   }
 
-  getHandResultString() {
-    return 'NOT IMPLEMENTED';
-  }
+  // getHandResultString() {
+  //   return 'NOT IMPLEMENTED';
+  // }
 
   toString() {
     return `${this.name} ${this.getHandResultString()}`;
