@@ -84,22 +84,36 @@ class CardSet extends Set {
    * @return Array containing 5 cards in descending order if a straight is found; undefined otherwise
    */
   getStraight(options = {}) {
-    const straight = this.toSortedArray().reduce((acc, current) => {
-      if (acc.length === 5) { // Short circuit if we found our straight
-        return acc;
-      }
+    const { royalFlush, straightFlush } = options;
 
-      const [last] = acc.slice(-1);
+    // Our search space is partitioned by suit in the case of royal/straight flush; otherwise, any suit goes
+    const searchBuckets = royalFlush || straightFlush ? Object.values(this.getGroupsBySuit()) : [this.toSortedArray()];
 
-      // Compare last with current
+    // console.log('Options:', options, 'searchBuckets', searchBuckets)
 
-      console.log('last', last);
-      console.log('acc', acc);
-      console.log('current', current)
-      acc.push(current);
-      return acc;
-    }, []);
-    return straight.length != 5 ? false : straight;
+    // Find and return the first (ie. only) occurrence of a 5-card straight within the 5 community cards + 2 hand cards
+    return searchBuckets.map((cardArray) => {
+
+      // See if a straight is found in the current bucket by reducing it with a search function
+      const possibleStraight = cardArray.reduce((acc, current) => {
+
+        // Get the last card in the accumulator
+        const [previous] = acc.slice(-1);
+
+        if (acc.length === 5) { // Base case - return a completed straight immediately
+          return acc;
+        } else if (!previous) { // First card in the set (or is an Ace when we're searching for a royal flush)
+          return !royalFlush || (royalFlush && current.face === 'A') ? [current] : [];
+        } else if (current.face === previous.face) { // Same card; skip
+          return acc;
+        } else if (current.isImmediatelyAfter(previous)) { // Current card is adjacent to the previous card
+          return [...acc, current];
+        } else { // Reset the accumulator because this card isn't adjacent to the previous
+          return [];
+        }
+      }, []);
+      return possibleStraight.length != 5 ? false : possibleStraight;
+    }).find(Boolean);
   }
 
   /**
@@ -142,6 +156,10 @@ class Card {
 
   toString() {
     return `${this.getFaceName()} of ${this.getSuit()} (${this.getNumericFaceValue()})`;
+  }
+
+  isImmediatelyAfter(previousCard) {
+    return (previousCard.getNumericFaceValue() - this.getNumericFaceValue() === 1) || (previousCard.face === '2' && this.face === 'A')
   }
 
   /**
@@ -207,11 +225,21 @@ class HandResult {
   //   }
   // }
 
-  static buildRoyalFlush(cards) {
+  static buildRoyalFlush(cards, flush) {
     return new HandResult({
       name: 'Royal Flush',
       handRank: 0,
       cards,
+      getHandResultString: () => flush[0].getSuit(),
+    });
+  }
+
+  static buildStraightFlush(cards, flush) {
+    return new HandResult({
+      name: 'Straight Flush',
+      handRank: 1,
+      cards,
+      getHandResultString: () => flush[0].getFaceName(),
     });
   }
 
@@ -220,7 +248,7 @@ class HandResult {
       name: 'Four of a Kind',
       handRank: 2,
       cards,
-      getHandResultString: () => `${quad[0].getFaceName()}`,
+      getHandResultString: () => quad[0].getFaceName(),
     });
   }
 
@@ -238,7 +266,16 @@ class HandResult {
       name: 'Flush',
       handRank: 4,
       cards,
-      getHandResultString: () => `${flush[0].getFaceName()}`
+      getHandResultString: () => flush[0].getFaceName(),
+    });
+  }
+
+  static buildStraight(cards, straight) {
+    return new HandResult({
+      name: 'Straight',
+      handRank: 5,
+      cards,
+      getHandResultString: () => straight[0].getFaceName(),
     });
   }
 
@@ -247,7 +284,7 @@ class HandResult {
       name: 'Three of a Kind',
       handRank: 6,
       cards,
-      getHandResultString: () => `${triple[0].getFaceName()}`,
+      getHandResultString: () => triple[0].getFaceName(),
     });
   }
 
@@ -265,7 +302,7 @@ class HandResult {
       name: 'Pair',
       handRank: 8,
       cards,
-      getHandResultString: () => `${pair[0].getFaceName()}`,
+      getHandResultString: () => pair[0].getFaceName(),
     });
   }
 
@@ -274,7 +311,7 @@ class HandResult {
       name: 'High',
       handRank: 9,
       cards,
-      getHandResultString: () => `${highCard.getFaceName()}`,
+      getHandResultString: () => highCard.getFaceName(),
     });
   }
 }

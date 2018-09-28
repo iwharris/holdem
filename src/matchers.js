@@ -1,9 +1,5 @@
 const { HandResult, Card, CardSet } = require('./entities');
 
-/**
- * Helpers
- */
-
 function sortGroupsByFaceValue(faceGroups) {
   return Object.values(faceGroups)
     .sort((pairA, pairB) => Card.faceValueComparator(pairA[0], pairB[0])); // Sort in descending face value
@@ -17,11 +13,15 @@ function sortGroupsByFaceValue(faceGroups) {
  */
 
 function matchRoyalFlush(cards) {
-  return false;
+  const royalFlush = cards.getStraight({ royalFlush: true });
+
+  return !royalFlush ? false : HandResult.buildRoyalFlush(cards, royalFlush);
 }
 
 function matchStraightFlush(cards) {
-  return false;
+  const straightFlush = cards.getStraight({ straightFlush: true });
+
+  return !straightFlush ? false : HandResult.buildStraightFlush(cards, straightFlush);
 }
 
 function matchFourOfAKind(cards) {
@@ -62,9 +62,10 @@ function matchFlush(cards) {
 }
 
 function matchStraight(cards) {
+  // Find any straight
   const straight = cards.getStraight();
 
-  return false;
+  return !straight ? false : HandResult.buildStraight(cards, straight);
 }
 
 function matchThreeOfAKind(cards) {
