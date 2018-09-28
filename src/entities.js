@@ -91,13 +91,15 @@ class CardSet extends Set {
 
   getGroupsBy(groupProperty) {
     return this.toSortedArray().reduce((groups, card) => {
-      if (!groups[card[groupProperty]]) {
-        groups[card[groupProperty]] = [card];
+      const result = groups;
+
+      if (!result[card[groupProperty]]) {
+        result[card[groupProperty]] = [card];
       } else {
-        groups[card[groupProperty]].push(card);
+        result[card[groupProperty]].push(card);
       }
 
-      return groups;
+      return result;
     }, {});
   }
 

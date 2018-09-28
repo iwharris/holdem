@@ -16,13 +16,11 @@ function parseInput(lines) {
 }
 
 function rankHands(communityCards, hands) {
-  // Calculate the HandResult for each Hand
-  hands.forEach((hand) => {
-    hand.result = findHandResult(hand.cards.union(communityCards));
-  });
-
-  // Sort hands by rank, breaking ties where possible
-  return hands.sort((handA, handB) => handA.result.handRank - handB.result.handRank);
+  return hands
+    // Calculate the HandResult for each Hand
+    .map(hand => Object.assign(hand, { result: findHandResult(hand.cards.union(communityCards)) }))
+    // Sort hands by rank, breaking ties where possible
+    .sort((handA, handB) => handA.result.handRank - handB.result.handRank);
 }
 
 module.exports = {
