@@ -7,13 +7,30 @@ A Node utility to parse the state of a game of Texas Hold'em, classify and rank 
 
 ## Installation
 
-```npm install git+https://github.com/iwharris/holdem```
+Either install directly from Github:
 
-This utility has zero production dependencies.
+```
+npm install -g iwharris/holdem
+```
 
-To install dependencies for development and tests:
+Or clone and install locally:
+
+```
+git clone https://github.com/iwharris/holdem.git
+cd holdem
+npm install -g
+```
+
+This utility has zero production dependencies. To install dependencies for development and tests:
 
 ```npm install```
+
+## Uninstallation
+
+```
+cd holdem
+npm uninstall -g
+```
 
 ## Usage
 
