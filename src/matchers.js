@@ -1,8 +1,9 @@
 const { HandResult, Card, CardSet } = require('./entities');
 
 function sortGroupsByFaceValue(faceGroups) {
+  // Sort faceGroups in descending face value
   return Object.values(faceGroups)
-    .sort((pairA, pairB) => Card.faceValueComparator(pairA[0], pairB[0])); // Sort in descending face value
+    .sort((pairA, pairB) => Card.faceValueComparator(pairA[0], pairB[0]));
 }
 
 /**
@@ -41,11 +42,17 @@ function matchFullHouse(cards) {
   // Get the best possible full house
   const fullHouse = sortGroupsByFaceValue(tripleGroups)
     .map((triple) => {
-      const remainingCards = cards.difference(new CardSet(triple)); // Make a cardSet minus the triple
-      const remainingPairs = remainingCards.getFaceGroupsOfSize(2); // Look for pairs in the subset
-      const bestPairArray = sortGroupsByFaceValue(remainingPairs).slice(0, 1); // Pick the highest pair
+      // Make a cardSet minus the triple
+      const remainingCards = cards.difference(new CardSet(triple));
 
-      return !bestPairArray.length ? undefined : [triple, bestPairArray[0]]; // Return [triple, pair] if pair is found, undefined otherwise
+      // Look for pairs in the subset
+      const remainingPairs = remainingCards.getFaceGroupsOfSize(2);
+
+      // Pick the highest pair
+      const bestPairArray = sortGroupsByFaceValue(remainingPairs).slice(0, 1);
+
+      // Return [triple, pair] if pair is found, undefined otherwise
+      return !bestPairArray.length ? undefined : [triple, bestPairArray[0]];
     }).find(Boolean); // Find first truthy result
 
   return !fullHouse ? false : HandResult.buildFullHouse(cards, fullHouse[0], fullHouse[1]);
@@ -58,7 +65,9 @@ function matchFlush(cards) {
   // Find any group with 5+ cards
   const flushGroup = Object.values(suitGroups).find(group => group.length >= 5);
 
-  return !flushGroup ? false : HandResult.buildFlush(cards, flushGroup.sort(Card.faceValueComparator));
+  return !flushGroup
+    ? false
+    : HandResult.buildFlush(cards, flushGroup.sort(Card.faceValueComparator));
 }
 
 function matchStraight(cards) {
@@ -76,14 +85,15 @@ function matchThreeOfAKind(cards) {
   const faceList = sortGroupsByFaceValue(faceGroups)
     .slice(0, 1);
 
-    return faceList.length !== 1 ? false : HandResult.buildThreeOfAKind(cards, faceList[0]);
+  return faceList.length !== 1 ? false : HandResult.buildThreeOfAKind(cards, faceList[0]);
 }
 
 function matchTwoPair(cards) {
   // Group cards into pairs by face
   const faceGroups = cards.getFaceGroupsOfSize(2);
 
-  // Sort pairs by face value to get the highest two, returning an array containing two arrays, each with a pair of Cards.
+  // Sort pairs by face value to get the highest two, returning an array containing two arrays,
+  // each with a pair of Cards.
   const faceList = sortGroupsByFaceValue(faceGroups)
     .slice(0, 2);
 
@@ -95,7 +105,7 @@ function matchOnePair(cards) {
   const faceGroups = cards.getFaceGroupsOfSize(2);
 
   // If we have gotten this far, there is a maximum of one pair - get it if one exists
-  groups = Object.values(faceGroups);
+  const groups = Object.values(faceGroups);
 
   return !groups.length ? false : HandResult.buildOnePair(cards, groups[0]);
 }
@@ -117,13 +127,7 @@ function findHandResult(cardSet) {
     matchTwoPair,
     matchOnePair,
     matchHighCard, // This will always return a result
-  ].reduce((foundMatch, matcher) => {
-    // If we haven't found a match yet, invoke the matcher - otherwise, just return the found match
-    if (!foundMatch) {
-      foundMatch = matcher(cardSet);
-    }
-    return foundMatch;
-  }, false);
+  ].reduce((foundMatch, matcher) => (!foundMatch ? matcher(cardSet) : foundMatch), false);
 }
 
 module.exports = {

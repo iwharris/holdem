@@ -5,7 +5,7 @@ const FACE_VALUE_NAMES = {
   J: 'Jack',
   Q: 'Queen',
   K: 'King',
-  A: 'Ace'
+  A: 'Ace',
 };
 
 const SUITS = ['D', 'H', 'S', 'C'];
@@ -14,7 +14,7 @@ const SUIT_NAMES = {
   D: 'Diamonds',
   H: 'Hearts',
   S: 'Spades',
-  C: 'Clubs'
+  C: 'Clubs',
 };
 
 module.exports = {

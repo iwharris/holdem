@@ -1,9 +1,9 @@
 {
-    "parserOptions": {
-        "ecmaVersion": 2018,
-        "sourceType": "module"
+    "extends": "airbnb-base",
+    "env": {
+        "jest/globals": true
     },
-    "rules": {
-        "semi": 2
-    }
+    "plugins": [
+        "jest"
+    ]
 }
