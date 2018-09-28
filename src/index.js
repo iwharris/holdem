@@ -30,7 +30,7 @@ function main() {
 
 	const hands = handStrings.map(Hand.fromString);
 
-	console.log('Community cards:', communityCards.map(c => c.toString()).join(', '));
+	// console.log('Community cards:', communityCards.map(c => c.toString()).join(', '));
 
 	// Calculate the HandResult for each Hand
 	hands.forEach(hand => hand.result = findHandResult(hand.cards.union(communityCards)));
@@ -39,8 +39,9 @@ function main() {
 	const ranking = hands.sort((handA, handB) => handA.result.handRank - handB.result.handRank);
 
 	// Print each ranking, player name, and hand
-	ranking.forEach((hand) => {
-		console.log(`${hand.result.handRank} ${hand.name} ${hand.result.toString()} [${hand.cards.union(communityCards).toString()}]`);
+	ranking.forEach((hand, index) => {
+		// TODO use handRank to tie-break within each class of hand
+		console.log(`${index + 1} ${hand.name} ${hand.result.toString()} [${hand.cards.union(communityCards).toString()}]`);
 	});
 }
 
