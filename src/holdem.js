@@ -1,10 +1,11 @@
-const { CardSet, Card, Hand } = require('./entities');
+const { CardSet, Hand } = require('./entities');
 const { findHandResult } = require('./matchers');
 
 function parseInput(lines) {
   const [communityCardsString, ...handStrings] = lines;
 
-  const communityCards = new CardSet((communityCardsString.split(' ').map(Card.fromString)));
+  // const communityCards = new CardSet(communityCardsString.split(' ').map(Card.fromString));
+  const communityCards = CardSet.fromString(communityCardsString);
 
   if (communityCards.size !== 5) {
     throw new Error('5 community cards are required.');

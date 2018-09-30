@@ -12,7 +12,7 @@ class Card {
     }
 
     if (!FACE_VALUES.includes(face)) {
-      throw new Error(`'${face} is not a valid face'`);
+      throw new Error(`'${face}' is not a valid face'`);
     }
     this.face = face;
     this.suit = suit;
@@ -188,7 +188,11 @@ class CardSet extends Set {
   }
 
   toString() {
-    return this.map(card => `${card.face}${card.suit}`).join(', ');
+    return `[${this.map(card => `${card.face}${card.suit}`).join(', ')}]`;
+  }
+
+  static fromString(cardsString) {
+    return new CardSet(cardsString.split(' ').map(Card.fromString));
   }
 }
 
