@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/iwharris/holdem.svg?style=svg)](https://circleci.com/gh/iwharris/holdem)
+[![codecov](https://codecov.io/gh/iwharris/holdem/branch/master/graph/badge.svg)](https://codecov.io/gh/iwharris/holdem)
 
 # holdem
 A Node utility to parse the state of a game of Texas Hold'em, classify and rank hands, and output the results.
