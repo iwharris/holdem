@@ -40,6 +40,6 @@ jobs:
       - run: yarn test
 
       - store_test_results:
-        path: coverage
+          path: coverage
 
 
