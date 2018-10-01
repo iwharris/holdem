@@ -21,5 +21,8 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jest": "^21.22.1",
     "jest": "^23.6.0"
+  },
+  "jest": {
+    "coverageDirectory": "coverage/jest"
   }
 }
