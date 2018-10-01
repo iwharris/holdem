@@ -43,4 +43,4 @@ TBD
 
 ```npm test```
 
-After testing, an HTML coverage report can be found at `./coverage/lcov-report/index.html`.
+After testing, an HTML coverage report can be found at `./coverage/jest/lcov-report/index.html`.

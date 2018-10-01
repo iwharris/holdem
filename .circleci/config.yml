@@ -43,6 +43,10 @@ jobs:
       - store_test_results:
           path: coverage
 
+      - store_artifacts:
+          path: /coverage/jest/lcov-report
+          destination: coverage
+
       # upload coverage report
       - run: curl -s https://codecov.io/bash | bash -s -- -t "${CODECOV_TOKEN}"
 
