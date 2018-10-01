@@ -333,6 +333,16 @@ class HandResult {
    * Static builders
    *
    * The following static functions take explicit inputs and map them to a HandResult object.
+   *
+   * Each builder must initialize a HandResult with the following minimum properties:
+   *
+   * - name: Name of the hand (eg. "Royal Flush")
+   * - handRank: Index of the hand (lower index is higher-value)
+   * - cards: Full CardSet of the union of community cards and hole cards for the player
+   * - getHandResultString: a Function returning a String representing the kicker(s)
+   *
+   * In the future, a comparator(HandResult, HandResult) function will be accepted and used to break
+   * ties within hands of the same type.
    */
 
   static buildRoyalFlush(cards, flush) {

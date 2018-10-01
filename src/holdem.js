@@ -4,7 +4,6 @@ const { findHandResult } = require('./matchers');
 function parseInput(lines) {
   const [communityCardsString, ...handStrings] = lines;
 
-  // const communityCards = new CardSet(communityCardsString.split(' ').map(Card.fromString));
   const communityCards = CardSet.fromString(communityCardsString);
 
   if (communityCards.size !== 5) {

@@ -1,8 +1,16 @@
 const fs = require('fs');
 
+/**
+ * Reads process args and returns matched flags.
+ *
+ * @param {*} argv
+ */
 function readArgs(argv = []) {
+  const getFlag = args => args.map(f => argv.includes(f)).some(Boolean);
+
   return {
-    isVerbose: ['--verbose', '-v'].map(f => argv.includes(f)).some(Boolean),
+    isVerbose: getFlag(['--verbose', '-v']),
+    printHelp: getFlag(['--help', '-h']),
   };
 }
 
