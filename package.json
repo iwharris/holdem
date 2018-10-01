@@ -1,6 +1,6 @@
 {
   "name": "holdem",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Node utility to parse the state of a game of Texas Hold'em, classify each player's hand, rank the hands, and output the results",
   "scripts": {
     "lint": "eslint src test",
