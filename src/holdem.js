@@ -23,7 +23,12 @@ function rankHands(communityCards, hands) {
     .sort(Hand.resultComparator);
 }
 
+function getOutput(rankings, isVerbose) {
+  return rankings.map((hand, index) => `${index + 1} ${hand.name} ${hand.result.toString()}${isVerbose ? ` ${hand.cards.toString()}` : ''}`);
+}
+
 module.exports = {
   parseInput,
   rankHands,
+  getOutput,
 };

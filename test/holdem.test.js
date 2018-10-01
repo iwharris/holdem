@@ -1,5 +1,5 @@
 const { randomString, randomCardString, generateArray } = require('./testhelper');
-const { parseInput, rankHands } = require('../src/holdem');
+const { parseInput, rankHands, getOutput } = require('../src/holdem');
 const { Hand, CardSet } = require('../src/entities');
 const { findHandResult } = require('../src/matchers');
 
@@ -52,6 +52,50 @@ describe('Holdem Core', () => {
 
       expect(findHandResult).toBeCalledTimes(numberOfHands);
       expect(rankedHands).toHaveLength(numberOfHands);
+    });
+  });
+
+  describe('getOutput', () => {
+    it('invokes toString() on each handResult', () => {
+      const hand1 = Hand.fromString('foo AC KH');
+      hand1.name = 'Hand1';
+      hand1.handRank = 1;
+      hand1.result = { toString: jest.fn(() => 'Result1') };
+
+      const hand2 = Hand.fromString('bar 2S 2D');
+      hand2.name = 'Hand2';
+      hand2.handRank = 2;
+      hand2.result = { toString: jest.fn(() => 'Result2') };
+
+      const output = getOutput([hand1, hand2], false);
+
+      expect(output).toHaveLength(2);
+      expect(output).toEqual(expect.arrayContaining([
+        '1 Hand1 Result1',
+        '2 Hand2 Result2',
+      ]));
+      expect(hand1.result.toString).toHaveBeenCalledTimes(1);
+      expect(hand2.result.toString).toHaveBeenCalledTimes(1);
+    });
+
+    it('invokes the cards.toString() function when verbose mode is enabled', () => {
+      const resultToStringMock = jest.fn();
+      const cardsToStringMock = jest.fn();
+
+      const numberOfHands = 3;
+
+      const rankings = generateArray(numberOfHands, idx => ({
+        name: randomString(),
+        cards: { toString: cardsToStringMock },
+        handRank: idx,
+        result: { toString: resultToStringMock },
+      }));
+
+      const output = getOutput(rankings, true);
+
+      expect(output).toHaveLength(numberOfHands);
+      expect(resultToStringMock).toHaveBeenCalledTimes(numberOfHands);
+      expect(cardsToStringMock).toHaveBeenCalledTimes(numberOfHands);
     });
   });
 });

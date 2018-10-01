@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { readInput, readArgs } = require('./src/utils');
-const { parseInput, rankHands } = require('./src/holdem');
+const { parseInput, rankHands, getOutput } = require('./src/holdem');
 const { version } = require('./package.json');
 
 // Read command-line arguments
@@ -38,10 +38,13 @@ function main() {
   }
 
   // Determine each player's hand and sort them in order of hand value
-  const ranking = rankHands(communityCards, hands);
+  const rankings = rankHands(communityCards, hands);
 
   // Print each ranking, player name, and hand
-  ranking.forEach((hand, index) => console.log(`${index + 1} ${hand.name} ${hand.result.toString()}${isVerbose ? ` ${hand.cards.toString()}` : ''}`));
+  const outputLines = getOutput(rankings, isVerbose);
+
+  // Print output lines to stdout
+  outputLines.forEach(line => console.log(line));
 }
 
 try {
