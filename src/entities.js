@@ -5,6 +5,15 @@ const {
   SUIT_NAMES,
 } = require('./constants');
 
+/**
+ * Card is a simple class that stores the following state:
+ *
+ * - face value
+ * - suit
+ *
+ * Along with convenience functions for comparing Cards and converting
+ * its state into a human-readable form.
+ */
 class Card {
   constructor(face, suit) {
     if (!SUITS.includes(suit)) {
@@ -18,22 +27,37 @@ class Card {
     this.suit = suit;
   }
 
+  /**
+   * Gets the numeric face value of this Card, with higher being more valuable.
+   * Numeric cards get a value equal to their face value, eg. "3"'s value is 3.
+   * Face cards (incl. ten) get a value counting up accordingly, eg. "T" = 10, "K" = 13
+   */
   getNumericFaceValue() {
     return FACE_VALUES.findIndex(v => v === this.face) + 2;
   }
 
+  /**
+   * Gets a human-readable face value name from this Card.
+   * Numeric values (except for ten) are returned as a number, eg. "3" or "9".
+   * Face values (including ten) are returned as a word, eg. "Ten" or "Ace".
+   */
   getFaceName() {
     return FACE_VALUE_NAMES[this.face] || this.face;
   }
 
+  /**
+   * Gets a human-readable suit name from this Card.
+   */
   getSuit() {
     return SUIT_NAMES[this.suit];
   }
 
-  toString() {
-    return `${this.getFaceName()} of ${this.getSuit()} (${this.getNumericFaceValue()})`;
-  }
-
+  /**
+   * Convenience function that is used when detecting straights. A card is immediately after
+   * another if its value is 1 below previousCard's value. This function accounts for the special
+   * case where aces can be low in a straight or straight flush.
+   * @param {Card} previousCard
+   */
   isImmediatelyAfter(previousCard) {
     return (previousCard.getNumericFaceValue() - this.getNumericFaceValue() === 1) || (previousCard.face === '2' && this.face === 'A');
   }
@@ -58,13 +82,26 @@ class Card {
   }
 }
 
+/**
+ * CardSet is a representation of some Cards using Set semantics. It offers some useful
+ * functionality:
+ *
+ * - De-duplication of cards
+ * - Easy membership checks
+ * - Union/difference operations with other CardSets.
+ *
+ * It also contains many convenience functions that aid in detecting HandResults for a set of
+ * cards.
+ */
 class CardSet extends Set {
+  /**
+   * Included for convenience. Generates a sorted array of Cards (in descending face value)
+   * from this Set and then applies map() on the array.
+   *
+   * @param {Function} mapFunc
+   */
   map(mapFunc) {
     return this.toSortedArray().map(mapFunc);
-  }
-
-  filter(filterFunc) {
-    return this.toSortedArray().filter(filterFunc);
   }
 
   /* Set operations */
@@ -73,22 +110,30 @@ class CardSet extends Set {
    * Given another Cardset, returns a new CardSet that represents the union of this CardSet
    * and the other CardSet (ie. all elements of both CardSets without duplicates).
    *
-   * @param {*} otherSet A new Cardset
+   * @param {CardSet} otherSet
    */
   union(otherSet) {
     return new CardSet([...this, ...otherSet]);
   }
 
-  intersection(otherSet) {
-    return new CardSet([...this].filter(card => otherSet.has(card)));
-  }
-
+  /**
+   * Given another CardSet, returns a new CardSet that represents the difference of this CardSet
+   * and the other CardSet (ie. the elements of this CardSet minus the elements in otherSet).
+   *
+   * @param {CardSet} otherSet
+   */
   difference(otherSet) {
     return new CardSet([...this].filter(card => !otherSet.has(card)));
   }
 
   /* Conversions */
 
+  /**
+   * Groups cards in this CardSet into "buckets" based on suit or face. This function
+   * is used when detecting certain hands or combinations of cards.
+   *
+   * @param {String} groupProperty either "suit" or "face"
+   */
   getGroupsBy(groupProperty) {
     return this.toSortedArray().reduce((groups, card) => {
       const result = groups;
@@ -121,6 +166,12 @@ class CardSet extends Set {
     return this.getGroupsBy('face');
   }
 
+  /**
+   * Convenience function that separates this set's Cards into buckets based on face value,
+   * returning bucket(s) that have the specified size. Used to detect pairs, triples, and quads.
+   *
+   * @param {int} size
+   */
   getFaceGroupsOfSize(size) {
     const faceGroups = this.getGroupsByFaceValue();
     const faces = Object.keys(faceGroups).filter(key => faceGroups[key].length >= size);
@@ -153,8 +204,8 @@ class CardSet extends Set {
     // community cards + 2 hand cards
     return searchBuckets.map((cardArray) => {
       // See if a straight is found in the current bucket by reducing it with a search function
-      const possibleStraight = cardArray.reduce((acc, current) => {
-        let result = [];
+      const possibleStraight = cardArray.reduce((acc, current, index, sourceArray) => {
+        let result = [current];
 
         // Get the last card in the accumulator
         const [previous] = acc.slice(-1);
@@ -173,6 +224,15 @@ class CardSet extends Set {
           result = [...acc, current];
         }
 
+        // Special case for straight and straight flush... treat aces as low
+        if (!royalFlush && (current.face === '2' && result.length === 4)) {
+          const possibleAce = sourceArray.find(card => card.face === 'A');
+
+          if (possibleAce) {
+            result = [...result, possibleAce];
+          }
+        }
+
         return result;
       }, []);
       return possibleStraight.length !== 5 ? false : possibleStraight;
@@ -187,37 +247,79 @@ class CardSet extends Set {
     return Array.from(this).sort(Card.faceValueComparator);
   }
 
+  /**
+   * Get a string representation of this CardSet in the form of a sorted array
+   * of the Cards it contains.
+   */
   toString() {
     return `[${this.map(card => `${card.face}${card.suit}`).join(', ')}]`;
   }
 
+  /**
+   * Parse a CardSet from a string of valid Card strings (space-separated).
+   * For example:
+   * "AD KD QD" would parse to a CardSet of size 3, with an ace, king, and queen of diamonds.
+   *
+   * @param {String} cardsString
+   */
   static fromString(cardsString) {
     return new CardSet(cardsString.split(' ').map(Card.fromString));
   }
 }
 
+/**
+ * Hand represents a player's state in a game of Texas Hold'em - their name
+ * and their two hole cards.
+ */
 class Hand {
   constructor(name, cards = []) {
+    if (cards.length !== 2) {
+      throw new Error(`Player '${name}' must have two cards!`);
+    }
+
     this.name = name;
     this.cards = new CardSet(cards);
   }
 
+  /**
+   * Parses a Hand from a string. A valid Hand string has the form:
+   *
+   * <name> <card1String> <card2String>
+   *
+   * @param {String} handString
+   */
   static fromString(handString) {
     const [name, ...cardStrings] = handString.split(' ')
       .map(str => str.trim()) // Strip whitespace from strings
       .filter(Boolean); // Omit falsy values
     const cards = cardStrings.map(Card.fromString);
-    if (cards.length !== 2) {
-      throw new Error(`Player '${name}' must have two cards!`);
-    }
     return new Hand(name, cards);
   }
 
-  toString() {
-    return `${this.name}: ${this.cards.map(c => c.toString()).join(', ')}`;
+  /**
+   * Sorts Hands by their computed HandResult in a naive way. Doesn't account for
+   * tie-breakers in Texas Hold'em although it can be extended in this way. This
+   * comparator will place hands of higher value first.
+   *
+   * @param {Hand} handA
+   * @param {Hand} handB
+   */
+  static resultComparator(handA, handB) {
+    // Note - this comparator is naively comparing hands based on the rank of the hand.
+    // Future implementation will do tie-breaking within hands of the same type, taking
+    // into account kickers, etc.
+    return handA.result.handRank - handB.result.handRank;
   }
 }
 
+/**
+ * HandResult is a class that encapsulates information about a hand formed in Texas Hold'em.
+ * It contains the name of the hand (eg. "Royal Flush"), its relative value to other hands,
+ * and some functions that aid in formatting its value in a human-readable way.
+ *
+ * HandResults are instantiated using static functions whose parameters correspond to the details
+ * of each possible hand.
+ */
 class HandResult {
   constructor(options = {}) {
     Object.assign(this, options);
@@ -226,14 +328,6 @@ class HandResult {
   toString() {
     return `${this.name} ${this.getHandResultString()}`;
   }
-
-  // compareHands(handA, handB) {
-  //   if (handA.handRank != handB.handRank) {
-  //     return handB.handRank - handA.handRank; // Lower handRank should come first
-  //   } else {
-  //     return this.comparator(handA, handB);
-  //   }
-  // }
 
   /**
    * Static builders

@@ -2,6 +2,8 @@ const crypto = require('crypto');
 
 const { FACE_VALUES, SUITS } = require('../src/constants');
 
+const { Card } = require('../src/entities');
+
 /**
  * Test Helpers
  *
@@ -17,7 +19,7 @@ function randomString(length = 5) {
 }
 
 /**
- * Picks a random element from an array.
+ * Returns a random element from an array.
  *
  * @param {*} array
  */
@@ -25,12 +27,31 @@ function randomElement(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+/**
+ * Returns a random valid suit (eg. 'S' or 'D')
+ */
 function randomSuit() {
   return randomElement(SUITS);
 }
 
+/**
+ * Returns a random valid face value (eg. '3' or 'J')
+ */
 function randomFace() {
   return randomElement(FACE_VALUES);
+}
+
+/**
+ * Generates a random valid card with any combination of suit and face value.
+ *
+ * The output can be restricted by face and/or suit by providing an options hash
+ * with "suit" and/or "face" properties.
+ *
+ * @param {*} options.face if provided, sets the resulting face
+ * @param {*} options.suit if provided, sets the resulting suit
+ */
+function randomCard(options = {}) {
+  return new Card(options.face || randomFace(), options.suit || randomSuit());
 }
 
 /**
@@ -52,7 +73,7 @@ function randomCardString(options = {}) {
  * @param {*} length
  * @param {*} generatorFunc
  */
-function generateArray(length, generatorFunc = () => undefined) {
+function generateArray(length, generatorFunc) {
   const array = [];
 
   for (let i = 0; i < length; i += 1) {
@@ -67,6 +88,7 @@ module.exports = {
   randomElement,
   randomSuit,
   randomFace,
+  randomCard,
   randomCardString,
   generateArray,
 };

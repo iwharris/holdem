@@ -20,8 +20,8 @@ function rankHands(communityCards, hands) {
   return hands
     // Calculate the HandResult for each Hand
     .map(hand => Object.assign(hand, { result: findHandResult(hand.cards.union(communityCards)) }))
-    // Sort hands by rank, breaking ties where possible
-    .sort((handA, handB) => handA.result.handRank - handB.result.handRank);
+    // Sort hands by rank. TODO break ties
+    .sort(Hand.resultComparator);
 }
 
 module.exports = {
