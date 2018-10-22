@@ -3,7 +3,7 @@ const {
   CardSet,
   Hand,
   HandResult,
-} = require('../src/entities');
+} = require('../../src/entities');
 
 const {
   randomSuit,

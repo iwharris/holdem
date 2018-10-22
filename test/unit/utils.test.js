@@ -4,7 +4,7 @@ jest.mock('fs');
 // Get the mocked module
 const fsMock = require('fs');
 
-const { readArgs, readInput } = require('../src/utils');
+const { readArgs, readInput } = require('../../src/utils');
 
 describe('Utils', () => {
   describe('readArgs', () => {

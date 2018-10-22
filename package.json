@@ -2,9 +2,12 @@
   "name": "holdem",
   "version": "1.0.1",
   "description": "A Node utility to parse the state of a game of Texas Hold'em, classify each player's hand, rank the hands, and output the results",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "scripts": {
     "lint": "eslint src test",
-    "test": "jest --coverage"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,6 +26,12 @@
     "jest": "^23.6.0"
   },
   "jest": {
-    "coverageDirectory": "coverage/jest"
+    "collectCoverage": true,
+    "coverageDirectory": "coverage/jest",
+    "coverageThreshold": {
+      "global": {
+        "lines": 80
+      }
+    }
   }
 }

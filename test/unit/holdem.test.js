@@ -1,9 +1,9 @@
 const { randomString, randomCardString, generateArray } = require('./testhelper');
-const { parseInput, rankHands, getOutput } = require('../src/holdem');
-const { Hand, CardSet } = require('../src/entities');
-const { findHandResult } = require('../src/matchers');
+const { parseInput, rankHands, getOutput } = require('../../src/holdem');
+const { Hand, CardSet } = require('../../src/entities');
+const { findHandResult } = require('../../src/matchers');
 
-jest.mock('../src/matchers');
+jest.mock('../../src/matchers');
 
 function generateValidCommunityCardsString() {
   return generateArray(5, () => randomCardString()).join(' ');
@@ -46,7 +46,7 @@ describe('Holdem Core', () => {
       const hands = generateArray(numberOfHands, () => generateValidHandString())
         .map(Hand.fromString);
 
-      findHandResult.mockImplementation(() => ({ handRank: 0 }));
+      findHandResult.mockImplementation(() => ({ handRank: 0, comparator: jest.fn(() => 0) }));
 
       const rankedHands = rankHands(communityCards, hands);
 
@@ -60,12 +60,12 @@ describe('Holdem Core', () => {
       const hand1 = Hand.fromString('foo AC KH');
       hand1.name = 'Hand1';
       hand1.handRank = 1;
-      hand1.result = { toString: jest.fn(() => 'Result1') };
+      hand1.result = { rank: 1, toString: jest.fn(() => 'Result1') };
 
       const hand2 = Hand.fromString('bar 2S 2D');
       hand2.name = 'Hand2';
       hand2.handRank = 2;
-      hand2.result = { toString: jest.fn(() => 'Result2') };
+      hand2.result = { rank: 2, toString: jest.fn(() => 'Result2') };
 
       const output = getOutput([hand1, hand2], false);
 

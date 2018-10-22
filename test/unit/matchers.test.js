@@ -1,6 +1,6 @@
-const { findHandResult } = require('../src/matchers');
+const { findHandResult } = require('../../src/matchers');
 
-const { Card, CardSet, HandResult } = require('../src/entities');
+const { Card, CardSet, HandResult } = require('../../src/entities');
 
 const { randomFace, randomSuit, randomCard } = require('./testhelper');
 

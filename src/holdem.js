@@ -19,12 +19,14 @@ function rankHands(communityCards, hands) {
   return hands
     // Calculate the HandResult for each Hand
     .map(hand => Object.assign(hand, { result: findHandResult(hand.cards.union(communityCards)) }))
-    // Sort hands by rank. TODO break ties
-    .sort(Hand.resultComparator);
+    // Sort hands by rank
+    .sort(Hand.classRankComparator)
+    // Break ties between hands of the same class
+    .reduce(Hand.tieBreakerReducer, []);
 }
 
 function getOutput(rankings, isVerbose) {
-  return rankings.map((hand, index) => `${index + 1} ${hand.name} ${hand.result.toString()}${isVerbose ? ` ${hand.cards.toString()}` : ''}`);
+  return rankings.map(hand => `${hand.result.rank} ${hand.name} ${hand.result.toString()}${isVerbose ? ` ${hand.cards.toString()}` : ''}`);
 }
 
 module.exports = {

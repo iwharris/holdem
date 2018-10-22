@@ -1,8 +1,8 @@
 const crypto = require('crypto');
 
-const { FACE_VALUES, SUITS } = require('../src/constants');
+const { FACE_VALUES, SUITS } = require('../../src/constants');
 
-const { Card } = require('../src/entities');
+const { Card } = require('../../src/entities');
 
 /**
  * Test Helpers

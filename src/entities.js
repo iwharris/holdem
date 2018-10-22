@@ -297,18 +297,40 @@ class Hand {
   }
 
   /**
-   * Sorts Hands by their computed HandResult in a naive way. Doesn't account for
-   * tie-breakers in Texas Hold'em although it can be extended in this way. This
-   * comparator will place hands of higher value first.
+   * Sorts Hands by their Result class, higher-value hands (eg. Royal Flush) coming
+   * before lower-value hands (eg. High Card). The comparator returns 0 for hand
+   * results of the same class (tie-breaking is done elsewhere).
    *
    * @param {Hand} handA
    * @param {Hand} handB
    */
-  static resultComparator(handA, handB) {
-    // Note - this comparator is naively comparing hands based on the rank of the hand.
-    // Future implementation will do tie-breaking within hands of the same type, taking
-    // into account kickers, etc.
+  static classRankComparator(handA, handB) {
     return handA.result.handRank - handB.result.handRank;
+  }
+
+  static tieBreakerReducer([previousHands = [], currentHandGroup = [], lastRank = 0], currentHand) {
+    console.log(previousHands, currentHandGroup, lastRank);
+    
+    if (previousHand && current) {
+
+    }
+    // const processedHand = currentHand;
+
+    // const [lastHand] = hands.slice(-1);
+    // const previousHands = hands.slice(0, hands.length - 2);
+
+    // if (lastHand && currentHand.result.handRank === lastHand.result.handRank) {
+    //   const compareResult = currentHand.result.comparator(lastHand.result, currentHand.result);
+
+    //   // Swap this hand with the last hand
+    //   if (compareResult > 0) {
+    //     return [...previousHands, processedHand, lastHand];
+    //   }
+    // }
+
+    // processedHand.result.rank = index + 1;
+
+    // return [...hands, processedHand];
   }
 }
 
@@ -351,6 +373,7 @@ class HandResult {
       handRank: 0,
       cards,
       getHandResultString: () => flush[0].getSuit(),
+      comparator: () => 0, // Royal flushes are always considered equal
     });
   }
 
@@ -360,6 +383,7 @@ class HandResult {
       handRank: 1,
       cards,
       getHandResultString: () => flush[0].getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -369,6 +393,7 @@ class HandResult {
       handRank: 2,
       cards,
       getHandResultString: () => quad[0].getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -377,7 +402,22 @@ class HandResult {
       name: 'Full House',
       handRank: 3,
       cards,
+      triple,
+      pair,
       getHandResultString: () => [triple, pair].map(group => group[0].getFaceName()).join(' '),
+      comparator: (resultA, resultB) => {
+        let result = 0;
+
+        // First, compare triples value
+        result = Card.faceValueComparator(resultA.triple[0], resultB.triple[0]);
+
+        // If triples are the same, compare doubles value
+        if (!result) {
+          result = Card.faceValueComparator(resultA.double[0], resultB.double[0]);
+        }
+
+        return result;
+      },
     });
   }
 
@@ -387,6 +427,7 @@ class HandResult {
       handRank: 4,
       cards,
       getHandResultString: () => flush[0].getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -396,6 +437,7 @@ class HandResult {
       handRank: 5,
       cards,
       getHandResultString: () => straight[0].getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -405,6 +447,7 @@ class HandResult {
       handRank: 6,
       cards,
       getHandResultString: () => triple[0].getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -414,6 +457,7 @@ class HandResult {
       handRank: 7,
       cards,
       getHandResultString: () => pairs.map(pair => pair[0].getFaceName()).join(' '),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -423,6 +467,7 @@ class HandResult {
       handRank: 8,
       cards,
       getHandResultString: () => pair[0].getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 
@@ -432,6 +477,7 @@ class HandResult {
       handRank: 9,
       cards,
       getHandResultString: () => highCard.getFaceName(),
+      comparator: () => 0, // TODO
     });
   }
 }
